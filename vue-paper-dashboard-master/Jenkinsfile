@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    environment {
+        NODE_VERSION = '8.1.4'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'master', 
+                    credentialsId: 'your-credentials-id', 
+                    url: 'https://github.com/Pivinter/IIC.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    def nodeHome = tool name: "NodeJS-${NODE_VERSION}", type: 'hudson.plugins.nodejs.tools.NodeJSInstallation'
+                    env.PATH = "${nodeHome}/bin:${env.PATH}"
+                }
+                sh 'npm install'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+        stage('Archive Build') {
+            steps {
+                archiveArtifacts artifacts: 'dist/**', fingerprint: true
+            }
+        }
+    }
+}
