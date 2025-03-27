@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      NODE_VERSION: 8.1.4
+      NODE_VERSION: 18
       WORKDIR: vue-paper-dashboard-master
 
     steps:
@@ -25,15 +25,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Update npm
-        run: npm install -g npm@latest
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Clear npm cache
-        run: npm cache clean --force
-
-      - name: Install dependencies
+      - name: Install dependencies with legacy-peer-deps
         working-directory: ${{ env.WORKDIR }}
-        run: npm install
+        run: npm install --legacy-peer-deps
+
+      - name: Run npm audit
+        working-directory: ${{ env.WORKDIR }}
+        run: npm audit --fix || true
 
       - name: Build project
         working-directory: ${{ env.WORKDIR }}
